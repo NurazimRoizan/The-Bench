@@ -7,7 +7,7 @@ import { Project } from '@prisma/client';
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
   initialData?: Project | null;
 }
 
@@ -27,6 +27,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
     if (initialData) {
       setFormData({
         ...initialData,
+        targetAudience: initialData.targetAudience || '',
         techStack: initialData.techStack.join(', '),
       });
     } else {

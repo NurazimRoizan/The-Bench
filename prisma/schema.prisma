@@ -11,9 +11,10 @@ model Project {
   name           String
   category       String
   concept        String
-  targetAudience String
-  status         String
+  targetAudience String?
+  status         String   @default("IDEA") // IDEA, IN_PROGRESS, SHIPPED
   techStack      String[]
+  userId         String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

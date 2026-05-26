@@ -3,10 +3,15 @@
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { Project } from '@prisma/client';
+import { auth } from '@clerk/nextjs/server';
 
 export async function getProjects() {
   try {
+    const { userId } = await auth();
+    if (!userId) return [];
+
     const projects = await prisma.project.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     });
     return projects;
@@ -16,10 +21,16 @@ export async function getProjects() {
   }
 }
 
-export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) {
+export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) {
   try {
+    const { userId } = await auth();
+    if (!userId) throw new Error('Unauthorized');
+
     const newProject = await prisma.project.create({
-      data,
+      data: {
+        ...data,
+        userId,
+      },
     });
     revalidatePath('/');
     return newProject;
@@ -29,8 +40,15 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'up
   }
 }
 
-export async function updateProject(id: string, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) {
+export async function updateProject(id: string, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>) {
   try {
+    const { userId } = await auth();
+    if (!userId) throw new Error('Unauthorized');
+
+    // Verify ownership
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userId) throw new Error('Unauthorized');
+
     const updatedProject = await prisma.project.update({
       where: { id },
       data,
@@ -45,6 +63,13 @@ export async function updateProject(id: string, data: Partial<Omit<Project, 'id'
 
 export async function deleteProject(id: string) {
   try {
+    const { userId } = await auth();
+    if (!userId) throw new Error('Unauthorized');
+
+    // Verify ownership
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userId) throw new Error('Unauthorized');
+
     await prisma.project.delete({
       where: { id },
     });
