@@ -35,9 +35,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${inter.variable} font-sans antialiased bg-neo-bg text-neo-black min-h-screen`}
-        >
+        <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
           {children}
         </body>
       </html>
