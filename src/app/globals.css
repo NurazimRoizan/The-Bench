@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neo-bg: #09090b;
+  --color-neo-panel: #18181b;
+  --color-neo-cyan: #06b6d4;
+  --color-neo-pink: #ec4899;
+  --color-neo-white: #f8fafc;
+  --color-neo-black: #000000;
+  
+  --shadow-neo-cyan: 4px 4px 0px 0px var(--color-neo-cyan);
+  --shadow-neo-pink: 4px 4px 0px 0px var(--color-neo-pink);
+  --shadow-neo-white: 4px 4px 0px 0px var(--color-neo-white);
+  --shadow-neo-sm-pink: 2px 2px 0px 0px var(--color-neo-pink);
+  --shadow-neo-sm-cyan: 2px 2px 0px 0px var(--color-neo-cyan);
+
+  --border-radius-neo: 0.25rem;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-neo-bg);
+    --foreground: var(--color-neo-white);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+}
+
+@layer utilities {
+  .neo-border {
+    @apply border-2 border-neo-white;
+  }
+  
+  .neo-card {
+    @apply bg-neo-panel border-2 border-neo-white rounded-sm p-4 transition-transform;
+  }
+  
+  .neo-card:hover {
+    @apply -translate-y-1 -translate-x-1;
+  }
+  
+  .neo-shadow-pink {
+    box-shadow: var(--shadow-neo-pink);
+  }
+  
+  .neo-shadow-cyan {
+    box-shadow: var(--shadow-neo-cyan);
+  }
+
+  .neo-shadow-white {
+    box-shadow: var(--shadow-neo-white);
+  }
+
+  .neo-button {
+    @apply font-bold border-2 border-neo-white rounded-sm px-4 py-2 bg-neo-black text-neo-white active:translate-y-1 active:translate-x-1 transition-all;
+  }
+
+  .neo-button-pink {
+    @apply bg-neo-pink text-white active:shadow-none hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-neo-pink;
+    box-shadow: var(--shadow-neo-sm-pink);
+    border-color: var(--color-neo-black);
+  }
+
+  .neo-button-cyan {
+    @apply bg-neo-cyan text-white active:shadow-none hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-neo-cyan;
+    box-shadow: var(--shadow-neo-sm-cyan);
+    border-color: var(--color-neo-black);
+  }
+  
+  .neo-input {
+    @apply w-full bg-neo-bg border-2 border-neo-white rounded-sm p-3 focus:outline-none focus:ring-2 focus:ring-neo-pink;
+  }
+  
+  .sticker-rotate-1 {
+    transform: rotate(2deg);
+  }
+  
+  .sticker-rotate-2 {
+    transform: rotate(-2deg);
+  }
+}
