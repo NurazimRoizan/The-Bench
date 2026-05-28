@@ -24,6 +24,10 @@ For the curious minds, here is what powers this vault:
 - Authentication: Clerk
 - PWA Integration: Serwist
 
+## Why This Exists?
+
+While The Bench is a fully functional workspace for your ideas, it also serves as a technical proving ground. This project was built to test drive modern backend architectures, integrate secure user authentication flows, and experiment with database models for future larger-scale projects.
+
 ## Where to Find It
 
 You do not need to clone this repository, run obscure terminal commands, or feed the servers. The Bench is fully hosted and waiting for your genius.
