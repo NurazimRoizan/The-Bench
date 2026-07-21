@@ -2,8 +2,12 @@
 
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { Project } from '@prisma/client';
+import { Project, Task } from '@prisma/client';
 import { auth } from '@clerk/nextjs/server';
+
+export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'> & {
+  tasks?: { id?: string; title: string; completed: boolean }[];
+};
 
 export async function getProjects() {
   try {
@@ -13,6 +17,7 @@ export async function getProjects() {
     const projects = await prisma.project.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      include: { tasks: true },
     });
     return projects;
   } catch (error) {
@@ -21,16 +26,22 @@ export async function getProjects() {
   }
 }
 
-export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) {
+export async function createProject(data: ProjectFormData) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error('Unauthorized');
 
+    const { tasks, ...projectData } = data;
+
     const newProject = await prisma.project.create({
       data: {
-        ...data,
+        ...projectData,
         userId,
+        tasks: {
+          create: tasks?.map(t => ({ title: t.title, completed: t.completed })) || [],
+        },
       },
+      include: { tasks: true },
     });
     revalidatePath('/');
     return newProject;
@@ -40,7 +51,7 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'up
   }
 }
 
-export async function updateProject(id: string, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>) {
+export async function updateProject(id: string, data: Partial<ProjectFormData>) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error('Unauthorized');
@@ -49,9 +60,21 @@ export async function updateProject(id: string, data: Partial<Omit<Project, 'id'
     const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing || existing.userId !== userId) throw new Error('Unauthorized');
 
+    const { tasks, ...projectData } = data;
+
     const updatedProject = await prisma.project.update({
       where: { id },
-      data,
+      data: {
+        ...projectData,
+        // Simplest approach: Delete existing tasks and recreate them if tasks array is provided
+        ...(tasks && {
+          tasks: {
+            deleteMany: {},
+            create: tasks.map(t => ({ title: t.title, completed: t.completed })),
+          }
+        })
+      },
+      include: { tasks: true },
     });
     revalidatePath('/');
     return updatedProject;

@@ -1,11 +1,12 @@
-import { Zap, Plus } from 'lucide-react';
+import { Zap, Plus, Sparkles } from 'lucide-react';
 import { SignInButton, UserButton, useAuth } from '@clerk/nextjs';
 
 interface HeaderProps {
   onAddIdea: () => void;
+  onSparkIdea: () => void;
 }
 
-export default function Header({ onAddIdea }: HeaderProps) {
+export default function Header({ onAddIdea, onSparkIdea }: HeaderProps) {
   const { userId } = useAuth();
   return (
     <header className="sticky top-0 z-50 bg-neo-bg/80 backdrop-blur-md border-b-2 border-neo-white p-4">
@@ -33,6 +34,13 @@ export default function Header({ onAddIdea }: HeaderProps) {
                   }}
                 />
               </div>
+              <button 
+                onClick={onSparkIdea}
+                className="neo-button neo-button-pink flex items-center gap-2"
+              >
+                <Sparkles size={20} />
+                <span className="hidden sm:inline font-bold">AI Spark</span>
+              </button>
               <button 
                 onClick={onAddIdea}
                 className="neo-button neo-button-cyan flex items-center gap-2"

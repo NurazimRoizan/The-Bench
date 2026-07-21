@@ -7,14 +7,16 @@ import Header from '@/components/Header';
 import FilterBar from '@/components/FilterBar';
 import ProjectGrid from '@/components/ProjectGrid';
 import ProjectModal from '@/components/ProjectModal';
-import { createProject, updateProject, getProjects } from '@/actions/projectActions';
+import AiSparkModal from '@/components/AiSparkModal';
+import { createProject, updateProject, getProjects, ProjectFormData } from '@/actions/projectActions';
 
 export default function DashboardPage() {
   const { isLoaded, userId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [filter, setFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isAiSparkOpen, setIsAiSparkOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const [optimisticProjects, addOptimisticProject] = useOptimistic(
@@ -38,8 +40,8 @@ export default function DashboardPage() {
     filter === 'All' ? true : p.status === filter
   );
 
-  const handleSaveIdea = async (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
-    const isEditing = !!editingProject;
+  const handleSaveIdea = async (data: ProjectFormData) => {
+    const isEditing = !!editingProject && !!editingProject.id;
     
     // Create an optimistic project object
     const optimisticData: Project = {
@@ -71,10 +73,15 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neo-bg">
-      <Header onAddIdea={() => {
-        setEditingProject(null);
-        setIsModalOpen(true);
-      }} />
+      <Header 
+        onAddIdea={() => {
+          setEditingProject(null);
+          setIsModalOpen(true);
+        }}
+        onSparkIdea={() => {
+          setIsAiSparkOpen(true);
+        }}
+      />
       
       <main>
         {!userId ? (
@@ -103,12 +110,26 @@ export default function DashboardPage() {
       </main>
 
       {userId && (
-        <ProjectModal 
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveIdea}
-          initialData={editingProject}
-        />
+        <>
+          <ProjectModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleSaveIdea}
+            initialData={editingProject}
+          />
+          <AiSparkModal 
+            isOpen={isAiSparkOpen}
+            onClose={() => setIsAiSparkOpen(false)}
+            onSuccess={(generatedData) => {
+              setIsAiSparkOpen(false);
+              setEditingProject({
+                ...generatedData,
+                tasks: generatedData.tasks.split(', ').filter(Boolean).map((t: string) => ({ title: t }))
+              });
+              setIsModalOpen(true);
+            }}
+          />
+        </>
       )}
     </div>
   );

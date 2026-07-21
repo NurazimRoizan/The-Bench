@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Project } from '@prisma/client';
+import { ProjectFormData } from '@/actions/projectActions';
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
-  initialData?: Project | null;
+  onSave: (project: ProjectFormData) => void;
+  initialData?: any;
 }
 
 const defaultData = {
@@ -18,6 +19,10 @@ const defaultData = {
   targetAudience: '',
   status: 'Idea',
   techStack: '',
+  features: '',
+  monetization: '',
+  competitors: '',
+  tasks: '',
 };
 
 export default function ProjectModal({ isOpen, onClose, onSave, initialData }: ProjectModalProps) {
@@ -29,6 +34,10 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
         ...initialData,
         targetAudience: initialData.targetAudience || '',
         techStack: initialData.techStack.join(', '),
+        features: initialData.features?.join(', ') || '',
+        monetization: initialData.monetization || '',
+        competitors: initialData.competitors?.join(', ') || '',
+        tasks: initialData.tasks?.map((t: any) => t.title).join(', ') || '',
       });
     } else {
       setFormData(defaultData);
@@ -42,6 +51,9 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
     onSave({
       ...formData,
       techStack: formData.techStack.split(',').map(t => t.trim()).filter(Boolean),
+      features: formData.features.split(',').map(f => f.trim()).filter(Boolean),
+      competitors: formData.competitors.split(',').map(c => c.trim()).filter(Boolean),
+      tasks: formData.tasks.split(',').map(t => ({ title: t.trim(), completed: false })).filter(t => t.title),
     });
     onClose();
   };
@@ -92,6 +104,27 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
             <div>
               <label className="block text-sm font-bold mb-1">Tech Stack (comma separated)</label>
               <input value={formData.techStack} onChange={e => setFormData({...formData, techStack: e.target.value})} className="neo-input" placeholder="Next.js, Tailwind, Prisma" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold mb-1">Features (comma separated)</label>
+              <input value={formData.features} onChange={e => setFormData({...formData, features: e.target.value})} className="neo-input" placeholder="Auth, Database, Payments" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold mb-1">Monetization</label>
+                <input value={formData.monetization} onChange={e => setFormData({...formData, monetization: e.target.value})} className="neo-input" placeholder="e.g. SaaS, Ads, Freemium" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Competitors (comma separated)</label>
+                <input value={formData.competitors} onChange={e => setFormData({...formData, competitors: e.target.value})} className="neo-input" placeholder="Competitor A, Competitor B" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold mb-1">Tasks (comma separated)</label>
+              <textarea value={formData.tasks} onChange={e => setFormData({...formData, tasks: e.target.value})} className="neo-input min-h-[80px]" placeholder="Setup project, Design DB schema, Implement Auth" />
             </div>
           </form>
         </div>
